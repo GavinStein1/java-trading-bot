@@ -11,7 +11,7 @@ public class Start {
     public static void main(String[] args) {
 
         System.out.println("Hello");
-        SpotClientImpl client = new SpotClientImpl("EC7jMFCKcuHdexWDDxkG9HpXlWNr56BPEuJma2toQiDhkSdD3xyFkITXEOAgItWN", "K3E5YsBjo0QX29oH9VFohkOBXewTrD2Hgjd1KQRO24mEMKHPvVU676Kbcd4BRfBo");
+        SpotClientImpl client = new SpotClientImpl(Private.API_KEY, Private.API_SECRET);
 		LinkedHashMap<String, Object> params = new LinkedHashMap<String, Object>();
 		params.put("symbol", "BTCUSDT");
         String result = client.createMarket().depth(params);
