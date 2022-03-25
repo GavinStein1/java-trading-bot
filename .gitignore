@@ -3,4 +3,4 @@ dependency-reduced-pom.xml
 *.log
 *.class
 *.txt
-# src/main/java/start/Private.java
+src/main/java/start/Private.java
