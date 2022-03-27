@@ -2,12 +2,15 @@ package src.main.java.start;
 
 import src.main.java.exceptions.MarketEdgeException;
 
+import com.binance.connector.client.impl.spot.Market;
+
 public class MarketEdge extends Object {
 
     private AssetVertex base;
     private AssetVertex quote;
     private Double price;
     private String symbol;
+    private Market market;
 
     public MarketEdge(AssetVertex base, AssetVertex quote) throws MarketEdgeException {
         super();
@@ -19,6 +22,7 @@ public class MarketEdge extends Object {
         this.price = 0.0;
         this.symbol = this.base.getName() + this.quote.getName();
         this.symbol = this.symbol.toLowerCase();
+        this.market = market;
     }
 
     public MarketEdge(AssetVertex base, AssetVertex quote, Double price) throws MarketEdgeException {
@@ -45,6 +49,10 @@ public class MarketEdge extends Object {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public Market getMarket() {
+        return this.market;
     }
 
     @Override

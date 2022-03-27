@@ -4,3 +4,5 @@ dependency-reduced-pom.xml
 *.class
 *.txt
 src/main/java/start/Private.java
+src/main/java/start/WebsocketConnectionThread.java
+logs/*
