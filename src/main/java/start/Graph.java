@@ -2,8 +2,6 @@ package src.main.java.start;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.Set;
-
 import src.main.java.exceptions.BellmanFordException;
 
 public class Graph {
@@ -67,7 +65,7 @@ public class Graph {
             distances.put(a.getName(), Double.NEGATIVE_INFINITY);
             previous.put(a.getName(), new LinkedList<String>());
         }
-
+        
         distances.replace(source, 0.0);
 
         int loopCtr = 0;
@@ -101,13 +99,17 @@ public class Graph {
 
         LinkedList<MarketEdge> path = new LinkedList<>();
 
+        if (previous.get(source).size() == 0) {
+            return path;
+        }
+
         int i = 0;
-        while (i < previous.get(source).size() - 1) {
+        while (i < (previous.get(source).size() - 1)) {
+            System.out.println(i);
             String edgeKey = previous.get(source).get(i) + "-" + previous.get(source).get(i+1);
             path.add(this.edges.get(edgeKey));
             i ++;
         }
-
         path.add(this.edges.get(previous.get(source).get(i) + "-" + source));
 
         return path;
