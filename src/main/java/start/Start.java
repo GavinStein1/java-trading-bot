@@ -75,15 +75,6 @@ public class Start {
                 System.out.println(String.format("Failed initialising market edge for %s%s", base, quote));
             }
         }
-        
-        // Gson gson = new Gson();
-        // Map exchangeInfoResponse = gson.fromJson(response, Map.class);
-        // ArrayList<Object> l = (ArrayList<Object>) exchangeInfoResponse.get("symbols");
-        // LinkedList<Map> mapList = new LinkedList<>();
-        // for (Object o : l) {
-        //     mapList.add((Map) o);
-        // }
-        // System.out.println(mapList.size());
 
     }
 
