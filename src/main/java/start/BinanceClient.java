@@ -8,8 +8,8 @@ public class BinanceClient {
 
     private String apiKey;
     private String apiSecret;
-    public WebsocketClientImpl wsClient;
-    public SpotClientImpl spotClient;
+    private WebsocketClientImpl wsClient;
+    private SpotClientImpl spotClient;
 
 
     public BinanceClient() {
@@ -32,6 +32,14 @@ public class BinanceClient {
 
     public Market getMarket() {
         return this.spotClient.createMarket();
+    }
+
+    public WebsocketClientImpl getWsClient() {
+        return this.wsClient;
+    }
+
+    public SpotClientImpl getSpotClient() {
+        return this.spotClient;
     }
     
 }

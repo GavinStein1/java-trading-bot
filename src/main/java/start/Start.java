@@ -34,7 +34,7 @@ public class Start {
         System.out.println("Hello...");
         System.out.println("Configuring bot...");
         BinanceClient binanceClient = new BinanceClient();
-        Graph graph = new Graph();
+        final Graph graph = new Graph();
 
         // read in from config file
         LinkedHashMap<String, String> configMap = readConfigFile(args[0]);
@@ -81,11 +81,14 @@ public class Start {
             graph.addMarketEdge(edge);
         }
 
-        for (AssetVertex vertex : graph.getVertices()) {            
-            System.out.println(vertex.getName());
+        // Connect to each edge's data stream (we only need best buy and ask)
+        LinkedHashMap<String, Integer> connectionIDs = new LinkedHashMap<>();
+        for (String edgeKey : graph.getEdges().keySet()) {
+            MarketEdge edge = graph.getEdges().get(edgeKey);
+            int connectionID = binanceClient.createBookTickerStream(edgeKey.toLowerCase());
+            connectionIDs.put(edgeKey, connectionID);
         }
 
-        System.out.println(graph.getEdges().size());
 
     }
 

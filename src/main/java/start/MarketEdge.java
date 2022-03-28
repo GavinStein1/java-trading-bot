@@ -21,7 +21,7 @@ public class MarketEdge extends Object {
         this.quote = quote;
         this.price = 0.0;
         this.symbol = this.base.getName() + this.quote.getName();
-        this.symbol = this.symbol.toLowerCase();
+        this.symbol = this.symbol.toUpperCase();
         this.market = market;
     }
 
