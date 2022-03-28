@@ -76,6 +76,17 @@ public class Start {
             }
         }
 
+        // Add edges to graph
+        for (MarketEdge edge : edges) {
+            graph.addMarketEdge(edge);
+        }
+
+        for (AssetVertex vertex : graph.getVertices()) {            
+            System.out.println(vertex.getName());
+        }
+
+        System.out.println(graph.getEdges().size());
+
     }
 
     public static LinkedHashMap<String, String> readConfigFile(String filepath) {

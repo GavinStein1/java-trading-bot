@@ -14,6 +14,14 @@ public class Graph {
         this.edges = new LinkedHashMap<>();
     }
 
+    public LinkedHashMap<String, MarketEdge> getEdges() {
+        return this.edges;
+    }
+
+    public LinkedList<AssetVertex> getVertices() {
+        return this.vertices;
+    }
+
     public void addMarketEdge(MarketEdge edge) {
 
         if (edge == null) {

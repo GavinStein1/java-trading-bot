@@ -57,7 +57,7 @@ public class MarketEdge extends Object {
 
     @Override
     public String toString() {
-        String str = this.base.getName() + "-" + this.quote.getName();
+        String str = this.base.getName().toUpperCase() + this.quote.getName().toUpperCase();
         return str;
     }
     
