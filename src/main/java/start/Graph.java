@@ -59,8 +59,9 @@ public class Graph {
         }
     }
 
-    public void updateEdge(MarketEdge edge, Double price) {
-        this.edges.get(edge.toString()).setPrice(price);
+    public void updateEdge(MarketEdge edge, double buyPrice, double askPrice) {
+        this.edges.get(edge.toString()).setBuyPrice(buyPrice);
+        this.edges.get(edge.toString()).setAskPrice(askPrice);
     }
 
     public LinkedList<MarketEdge> bellmanFord(String source) throws BellmanFordException {
@@ -80,28 +81,31 @@ public class Graph {
         while (loopCtr < this.vertices.size() - 1) {
             LinkedList<String> edgesKeys = new LinkedList<>();
             this.edges.forEach( (k, v) -> edgesKeys.add(k));
-
             for (String key : edgesKeys) {
-                String base = "";
-                String quote = "";
-                try {
-                    base = key.split("-")[0];
-                    quote = key.split("-")[1];
-                } catch (IndexOutOfBoundsException e) {
-                    throw new BellmanFordException("Key formatting error in edges list");
-                }
-                Double weight = this.edges.get(key).getPrice();       
+                MarketEdge edge = this.edges.get(key);
+                AssetVertex base = edge.getBase();
+                AssetVertex quote = edge.getQuote();
+                Double buyPrice = edge.getBuyPrice();   
+                Double askPrice = edge.getAskPrice();    
                 
-                if (distances.get(base) != Double.NEGATIVE_INFINITY && distances.get(base) + Math.log(weight) > distances.get(quote)) {
-                    if (!previous.get(quote).contains(base)) {
-                        distances.replace(quote, distances.get(base) + Math.log(weight));
-                        previous.get(quote).clear();
-                        previous.get(quote).addAll(previous.get(base));
-                        previous.get(quote).add(base);
+                if (distances.get(quote.getName()) != Double.NEGATIVE_INFINITY && distances.get(quote.getName()) + Math.log(1/buyPrice) > distances.get(base.getName())) {
+                    if (!previous.get(base.getName()).contains(quote.getName())) {
+                        distances.replace(base.getName(), distances.get(quote.getName()) + Math.log(1/buyPrice));
+                        previous.get(base.getName()).clear();
+                        previous.get(base.getName()).addAll(previous.get(quote.getName()));
+                        previous.get(base.getName()).add(quote.getName());
+                    }
+                }
+                if (distances.get(base.getName()) != Double.NEGATIVE_INFINITY && distances.get(base.getName()) + Math.log(askPrice) > distances.get(quote.getName())) {
+                    if (!previous.get(quote.getName()).contains(base.getName())) {
+                        distances.replace(quote.getName(), distances.get(base.getName()) + Math.log(askPrice));
+                        previous.get(quote.getName()).clear();
+                        previous.get(quote.getName()).addAll(previous.get(base.getName()));
+                        previous.get(quote.getName()).add(base.getName());
                     }
                 }
             }
-
+            // System.out.println(previous.get(source));
             loopCtr++;
         }
 
@@ -112,13 +116,39 @@ public class Graph {
         }
 
         int i = 0;
+        double profit = 1.0;
         while (i < (previous.get(source).size() - 1)) {
-            System.out.println(i);
-            String edgeKey = previous.get(source).get(i) + "-" + previous.get(source).get(i+1);
-            path.add(this.edges.get(edgeKey));
+            try {
+                String edgeKey = previous.get(source).get(i) + previous.get(source).get(i+1);
+                if (this.getEdges().keySet().contains(edgeKey)) {
+                    path.add(this.edges.get(edgeKey));
+                    profit = profit * this.edges.get(edgeKey).getAskPrice();
+                    // System.out.println(String.format("%s ask rate: %.8f", edgeKey, this.edges.get(edgeKey).getAskPrice()));
+                } else {
+                    edgeKey = previous.get(source).get(i + 1) + previous.get(source).get(i);
+                    path.add(this.edges.get(edgeKey));
+                    profit = profit * (1/this.edges.get(edgeKey).getBuyPrice());
+                    // System.out.println(String.format("%s buy rate: %.8f", edgeKey, 1/this.edges.get(edgeKey).getBuyPrice()));
+                }
+            } catch (NullPointerException e) { 
+                System.out.println(e.getMessage());
+            }
             i ++;
         }
-        path.add(this.edges.get(previous.get(source).get(i) + "-" + source));
+        try {
+            if (this.getEdges().keySet().contains(this.edges.get(previous.get(source).get(i) + source))) {
+                path.add(this.edges.get(previous.get(source).get(i) + source));
+                profit = profit * this.edges.get(previous.get(source).get(i) + source).getAskPrice();
+                // System.out.println(String.format("%s ask rate: %.8f", previous.get(source).get(i) + source, this.edges.get(previous.get(source).get(i) + source).getAskPrice()));
+            } else {
+                path.add(this.edges.get(source + previous.get(source).get(i)));
+                profit = profit * (1/this.edges.get(source + previous.get(source).get(i)).getBuyPrice());
+                // System.out.println(String.format("%s buy rate: %.8f", previous.get(source).get(i) + source, 1/this.edges.get(source + previous.get(source).get(i)).getBuyPrice()));
+            }
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
+        }
+        System.out.println(profit);
 
         return path;
 

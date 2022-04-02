@@ -11,8 +11,8 @@ public class TestMarketEdge {
 
     @Test
     public void testGoodEdge() throws MarketEdgeException {
-        MarketEdge marketEdge = new MarketEdge(new AssetVertex("BTC"), new AssetVertex("USD"), 1000.0);
-        assertEquals(1000.0, marketEdge.getPrice(), 0.001); 
+        MarketEdge marketEdge = new MarketEdge(new AssetVertex("BTC"), new AssetVertex("USD"));
+        assertEquals(0.0, marketEdge.getBuyPrice(), 0.001); 
         assertEquals("BTC", marketEdge.getBase().getName());
         assertEquals("USD", marketEdge.getQuote().getName());
     }
@@ -20,7 +20,7 @@ public class TestMarketEdge {
     @Test
     public void testNullEdge() throws MarketEdgeException {
         try {
-            MarketEdge marketEdge = new MarketEdge(null, null, 0.0);
+            MarketEdge marketEdge = new MarketEdge(null, null);
         } catch (Exception e) {
             assertEquals(new MarketEdgeException().getClass(), e.getClass());
         }

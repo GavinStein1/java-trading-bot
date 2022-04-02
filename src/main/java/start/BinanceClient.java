@@ -20,10 +20,8 @@ public class BinanceClient {
         this.spotClient = new SpotClientImpl(this.apiKey, this.apiSecret);
     }
 
-    public int createBookTickerStream(String market) {
-        return this.wsClient.bookTicker(market, ((event) -> {
-            System.out.println(event);
-        }));
+    public int createBookTickerStream(String market, Graph graph) {
+        return this.wsClient.bookTicker(market, new WebsocketCallbackImpl(graph));
     }    
 
     public void closeWSConnection(int id) {

@@ -8,7 +8,8 @@ public class MarketEdge extends Object {
 
     private AssetVertex base;
     private AssetVertex quote;
-    private Double price;
+    private double buyPrice;
+    private double askPrice;
     private String symbol;
     private Market market;
 
@@ -19,21 +20,22 @@ public class MarketEdge extends Object {
         }
         this.base = base;
         this.quote = quote;
-        this.price = 0.0;
+        this.buyPrice = 0.0;
+        this.askPrice = 0.0;
         this.symbol = this.base.getName() + this.quote.getName();
         this.symbol = this.symbol.toUpperCase();
         this.market = market;
     }
 
-    public MarketEdge(AssetVertex base, AssetVertex quote, Double price) throws MarketEdgeException {
-        super();
-        if (base == null || quote == null) {
-            throw new MarketEdgeException("Base or quote AssetVertex is null");
-        }
-        this.base = base;
-        this.quote = quote;
-        this.price = price;
-    }
+    // public MarketEdge(AssetVertex base, AssetVertex quote, Double price) throws MarketEdgeException {
+    //     super();
+    //     if (base == null || quote == null) {
+    //         throw new MarketEdgeException("Base or quote AssetVertex is null");
+    //     }
+    //     this.base = base;
+    //     this.quote = quote;
+    //     this.price = price;
+    // }
 
     public AssetVertex getBase() {
         return this.base;
@@ -43,12 +45,20 @@ public class MarketEdge extends Object {
         return this.quote;
     }
 
-    public Double getPrice() {
-        return this.price;
+    public double getBuyPrice() {
+        return this.buyPrice;
     }
 
-    public void setPrice(Double price) {
-        this.price = price;
+    public void setBuyPrice(double price) {
+        this.buyPrice = price;
+    }
+
+    public double getAskPrice() {
+        return this.askPrice;
+    }
+
+    public void setAskPrice(double price) {
+        this.askPrice = price;
     }
 
     public Market getMarket() {

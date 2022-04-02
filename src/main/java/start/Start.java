@@ -10,6 +10,9 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.lang.Thread;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
 
 import src.main.java.exceptions.BellmanFordException;
 import src.main.java.exceptions.ConfigException;
@@ -24,6 +27,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Start {
 
+    private static LinkedHashMap<String, String> configMap;
+    private static Graph graph = new Graph();
+    private static BinanceClient binanceClient = new BinanceClient();
+
     public static void main(String[] args) throws ConfigException {
 
         if (args.length < 1) {
@@ -33,11 +40,10 @@ public class Start {
 
         System.out.println("Hello...");
         System.out.println("Configuring bot...");
-        BinanceClient binanceClient = new BinanceClient();
-        final Graph graph = new Graph();
+        
 
         // read in from config file
-        LinkedHashMap<String, String> configMap = readConfigFile(args[0]);
+        configMap = readConfigFile(args[0]);
         
         String[] markets = null;
         try {
@@ -69,7 +75,7 @@ public class Start {
             AssetVertex base = new AssetVertex(symbol.baseAsset);
             AssetVertex quote = new AssetVertex(symbol.quoteAsset);
             try {
-                MarketEdge edge = new MarketEdge(base, quote, 0.0);
+                MarketEdge edge = new MarketEdge(base, quote);
                 edges.add(edge);
             } catch (MarketEdgeException e) {
                 System.out.println(String.format("Failed initialising market edge for %s%s", base, quote));
@@ -85,11 +91,26 @@ public class Start {
         LinkedHashMap<String, Integer> connectionIDs = new LinkedHashMap<>();
         for (String edgeKey : graph.getEdges().keySet()) {
             MarketEdge edge = graph.getEdges().get(edgeKey);
-            int connectionID = binanceClient.createBookTickerStream(edgeKey.toLowerCase());
+            int connectionID = binanceClient.createBookTickerStream(edgeKey.toLowerCase(), graph);
             connectionIDs.put(edgeKey, connectionID);
         }
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            System.out.println(e.getMessage());
+        }
 
+        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.scheduleAtFixedRate(Start::runBellmanFord, 0, 100, TimeUnit.MILLISECONDS);
+    }
 
+    public static void runBellmanFord() {
+        int a = 1;
+        try {
+        System.out.println(graph.bellmanFord("BTC"));
+        } catch (BellmanFordException e) {
+            System.out.println("Bellman ford exception thrown");
+        }
     }
 
     public static LinkedHashMap<String, String> readConfigFile(String filepath) {
