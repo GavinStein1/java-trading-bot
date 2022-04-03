@@ -41,8 +41,8 @@ public class Start {
         System.out.println("Hello...");
         System.out.println("Configuring bot...");
         
-
         // read in from config file
+        System.out.println("    Reading in config file...");
         configMap = readConfigFile(args[0]);
         
         String[] markets = null;
@@ -53,12 +53,14 @@ public class Start {
         }
 
         // Query exchange information on spot client and initialise ExchangeInfo object.
+        System.out.println("    Getting exchange market info...");
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
         ArrayList<String> symbols = new ArrayList<>();
         for (String m : markets) {
             symbols.add(m.strip().toUpperCase());
         }
         parameters.put("symbols", symbols);
+        
         Market binanceMarket = binanceClient.getMarket();
         String exchangeInfoResponse = binanceMarket.exchangeInfo(parameters);
         ExchangeInfo exchangeInfo = null;
@@ -70,6 +72,7 @@ public class Start {
         }
 
         // Create AssetVertex objects and MarketEdge objects
+        System.out.println("    Creating algorithm objects...");
         LinkedList<MarketEdge> edges = new LinkedList<>();
         for (Symbol symbol : exchangeInfo.symbols) {
             AssetVertex base = new AssetVertex(symbol.baseAsset);
@@ -88,14 +91,18 @@ public class Start {
         }
 
         // Connect to each edge's data stream (we only need best buy and ask)
+        System.out.println("    Connecting to websocket streams...");
         LinkedHashMap<String, Integer> connectionIDs = new LinkedHashMap<>();
         for (String edgeKey : graph.getEdges().keySet()) {
             MarketEdge edge = graph.getEdges().get(edgeKey);
+            System.out.println(edgeKey);
             int connectionID = binanceClient.createBookTickerStream(edgeKey.toLowerCase(), graph);
             connectionIDs.put(edgeKey, connectionID);
         }
         try {
-            Thread.sleep(5000);
+            System.out.println("Waiting 8 seconds...");
+            Thread.sleep(8000);
+            System.out.println("Let's go!");
         } catch (InterruptedException e) {
             System.out.println(e.getMessage());
         }

@@ -160,8 +160,6 @@ public class Graph {
             System.out.println(e.getMessage());
         }
         profit = (profit - 1)*100;
-        System.out.println(profit);
-        System.out.println("Returning path...");
         return path;
 
     }
