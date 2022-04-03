@@ -101,13 +101,16 @@ public class Start {
         }
 
         final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(Start::runBellmanFord, 0, 100, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(Start::runBellmanFord, 0, 10, TimeUnit.MILLISECONDS);
     }
 
     public static void runBellmanFord() {
         int a = 1;
         try {
-        System.out.println(graph.bellmanFord("BTC"));
+        LinkedList<MarketEdge> result = graph.bellmanFord("USDT");
+        if (result.size() != 0) {
+            System.out.println(result);
+        }
         } catch (BellmanFordException e) {
             System.out.println("Bellman ford exception thrown");
         }

@@ -14,6 +14,10 @@ public class Tester {
 
     private static void myTask() {
         System.out.println("Running");
+        double f = 0.00025;
+        double g = 0.00027;
+        double h = (f + g)/2;
+        System.out.println(String.format("%.5f", h));
     }
     
 }

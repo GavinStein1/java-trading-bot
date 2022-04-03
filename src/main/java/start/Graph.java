@@ -86,32 +86,36 @@ public class Graph {
                 AssetVertex base = edge.getBase();
                 AssetVertex quote = edge.getQuote();
                 Double buyPrice = edge.getBuyPrice();   
-                Double askPrice = edge.getAskPrice();    
+                Double askPrice = edge.getAskPrice();   
+                Double price = (buyPrice + askPrice)/2;
+                if (price == 0.0) {
+                    // No path found
+                    return new LinkedList<MarketEdge>();
+                }
                 
-                if (distances.get(quote.getName()) != Double.NEGATIVE_INFINITY && distances.get(quote.getName()) + Math.log(1/buyPrice) > distances.get(base.getName())) {
+                if (distances.get(quote.getName()) != Double.NEGATIVE_INFINITY && distances.get(quote.getName()) + Math.log(0.99925/price) > distances.get(base.getName())) {
                     if (!previous.get(base.getName()).contains(quote.getName())) {
-                        distances.replace(base.getName(), distances.get(quote.getName()) + Math.log(1/buyPrice));
+                        distances.replace(base.getName(), distances.get(quote.getName()) + Math.log(0.99925/price));
                         previous.get(base.getName()).clear();
                         previous.get(base.getName()).addAll(previous.get(quote.getName()));
                         previous.get(base.getName()).add(quote.getName());
                     }
                 }
-                if (distances.get(base.getName()) != Double.NEGATIVE_INFINITY && distances.get(base.getName()) + Math.log(askPrice) > distances.get(quote.getName())) {
+                if (distances.get(base.getName()) != Double.NEGATIVE_INFINITY && distances.get(base.getName()) + Math.log(0.99925 * price) > distances.get(quote.getName())) {
                     if (!previous.get(quote.getName()).contains(base.getName())) {
-                        distances.replace(quote.getName(), distances.get(base.getName()) + Math.log(askPrice));
+                        distances.replace(quote.getName(), distances.get(base.getName()) + Math.log(0.99925 * price));
                         previous.get(quote.getName()).clear();
                         previous.get(quote.getName()).addAll(previous.get(base.getName()));
                         previous.get(quote.getName()).add(base.getName());
                     }
                 }
             }
-            // System.out.println(previous.get(source));
             loopCtr++;
         }
 
         LinkedList<MarketEdge> path = new LinkedList<>();
-
         if (previous.get(source).size() == 0) {
+            // No path found...
             return path;
         }
 
@@ -122,34 +126,42 @@ public class Graph {
                 String edgeKey = previous.get(source).get(i) + previous.get(source).get(i+1);
                 if (this.getEdges().keySet().contains(edgeKey)) {
                     path.add(this.edges.get(edgeKey));
-                    profit = profit * this.edges.get(edgeKey).getAskPrice();
-                    // System.out.println(String.format("%s ask rate: %.8f", edgeKey, this.edges.get(edgeKey).getAskPrice()));
+                    double askPrice = this.edges.get(edgeKey).getAskPrice();
+                    double buyPrice = this.edges.get(edgeKey).getBuyPrice();
+                    profit = profit * (0.99925 * (askPrice + buyPrice)/2);
                 } else {
                     edgeKey = previous.get(source).get(i + 1) + previous.get(source).get(i);
                     path.add(this.edges.get(edgeKey));
-                    profit = profit * (1/this.edges.get(edgeKey).getBuyPrice());
-                    // System.out.println(String.format("%s buy rate: %.8f", edgeKey, 1/this.edges.get(edgeKey).getBuyPrice()));
+                    profit = profit * (0.99925/this.edges.get(edgeKey).getBuyPrice());
                 }
             } catch (NullPointerException e) { 
+                System.out.println(e.getStackTrace());
                 System.out.println(e.getMessage());
             }
             i ++;
         }
+
         try {
-            if (this.getEdges().keySet().contains(this.edges.get(previous.get(source).get(i) + source))) {
+            String edgeKey = previous.get(source).get(i) + source;
+            if (this.getEdges().keySet().contains(edgeKey)) {
                 path.add(this.edges.get(previous.get(source).get(i) + source));
-                profit = profit * this.edges.get(previous.get(source).get(i) + source).getAskPrice();
-                // System.out.println(String.format("%s ask rate: %.8f", previous.get(source).get(i) + source, this.edges.get(previous.get(source).get(i) + source).getAskPrice()));
+                double askPrice = this.edges.get(edgeKey).getAskPrice();
+                double buyPrice = this.edges.get(edgeKey).getBuyPrice();
+                profit = profit * (0.99925 * (askPrice + buyPrice)/2);
             } else {
-                path.add(this.edges.get(source + previous.get(source).get(i)));
-                profit = profit * (1/this.edges.get(source + previous.get(source).get(i)).getBuyPrice());
-                // System.out.println(String.format("%s buy rate: %.8f", previous.get(source).get(i) + source, 1/this.edges.get(source + previous.get(source).get(i)).getBuyPrice()));
+                edgeKey = source + previous.get(source).get(i);
+                path.add(this.edges.get(edgeKey));
+                double askPrice = this.edges.get(edgeKey).getAskPrice();
+                double buyPrice = this.edges.get(edgeKey).getBuyPrice();
+                profit = profit * (0.99925/((askPrice + buyPrice)/2));
             }
         } catch (NullPointerException e) {
+            System.out.println(e.getStackTrace());
             System.out.println(e.getMessage());
         }
+        profit = (profit - 1)*100;
         System.out.println(profit);
-
+        System.out.println("Returning path...");
         return path;
 
     }
