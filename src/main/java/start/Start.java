@@ -105,12 +105,11 @@ public class Start {
     }
 
     public static void runBellmanFord() {
-        int a = 1;
         try {
-        LinkedList<MarketEdge> result = graph.bellmanFord("USDT");
-        if (result.size() != 0) {
-            System.out.println(result);
-        }
+            LinkedList<MarketEdge> result = graph.bellmanFord("USDT");
+            if (result.size() != 0) {
+                System.out.println(result);
+            }
         } catch (BellmanFordException e) {
             System.out.println("Bellman ford exception thrown");
         }
