@@ -27,16 +27,6 @@ public class MarketEdge extends Object {
         this.market = market;
     }
 
-    // public MarketEdge(AssetVertex base, AssetVertex quote, Double price) throws MarketEdgeException {
-    //     super();
-    //     if (base == null || quote == null) {
-    //         throw new MarketEdgeException("Base or quote AssetVertex is null");
-    //     }
-    //     this.base = base;
-    //     this.quote = quote;
-    //     this.price = price;
-    // }
-
     public AssetVertex getBase() {
         return this.base;
     }

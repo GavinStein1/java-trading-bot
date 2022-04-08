@@ -1,23 +1,51 @@
 package src.main.java.start;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.Executors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import java.util.LinkedHashMap;
+import java.util.HashMap;
+
+import com.binance.connector.client.impl.SpotClientImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class Tester {
 
     public static void main (String[] args) {
 
-        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(Tester::myTask, 0, 1, TimeUnit.SECONDS);
-    }
+        BinanceClient client = new BinanceClient();
+        LinkedHashMap<String,Object> parameters = new LinkedHashMap<String,Object>();
 
-    private static void myTask() {
-        System.out.println("Running");
-        double f = 0.00025;
-        double g = 0.00027;
-        double h = (f + g)/2;
-        System.out.println(String.format("%.5f", h));
+        SpotClientImpl spotClient = client.getSpotClient();
+
+        parameters.put("type", "SPOT");
+
+        String result = spotClient.createWallet().accountSnapshot(parameters);
+
+        WalletInfo wallet = null;
+
+        Gson gson = new GsonBuilder().create();
+
+        wallet = gson.fromJson(result, WalletInfo.class);
+
+        for (SnapshotVos s : wallet.snapshotVos) {
+            for (Balance b : s.data.balances) {
+                System.out.println(b.asset + String.format(" %.4f", b.free));
+            }
+            System.out.println("------------------------");
+        }
+
+        System.out.println(wallet.snapshotVos[0]);
+        // // TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {};
+        // try {
+        //     ObjectMapper objectMapper = new ObjectMapper();
+        //     wallet = objectMapper.readValue(result, WalletInfo.class);
+        // } catch (JsonProcessingException e) {
+        //     System.out.println(e.getMessage());
+        // }
     }
     
 }

@@ -1,8 +1,11 @@
 package src.main.java.start;
 
-import com.binance.connector.client.impl.spot.Market;
+import java.util.LinkedHashMap;
+
 import com.binance.connector.client.impl.SpotClientImpl;
 import com.binance.connector.client.impl.WebsocketClientImpl;
+import com.binance.connector.client.impl.spot.Market;
+import com.google.gson.*;
 
 public class BinanceClient {
 
@@ -38,6 +41,17 @@ public class BinanceClient {
 
     public SpotClientImpl getSpotClient() {
         return this.spotClient;
+    }
+
+    public WalletInfo getWalletInfo() {
+
+        LinkedHashMap<String,Object> parameters = new LinkedHashMap<String,Object>();
+        parameters.put("type", "SPOT");
+        String result = this.spotClient.createWallet().accountSnapshot(parameters);
+        WalletInfo wallet = null;
+        Gson gson = new GsonBuilder().create();
+        wallet = gson.fromJson(result, WalletInfo.class);
+        return wallet;
     }
     
 }

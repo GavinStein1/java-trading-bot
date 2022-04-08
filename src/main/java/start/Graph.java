@@ -3,6 +3,7 @@ package src.main.java.start;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import src.main.java.exceptions.BellmanFordException;
+import src.main.java.start.Order.OrderType;
 
 public class Graph {
 
@@ -64,7 +65,7 @@ public class Graph {
         this.edges.get(edge.toString()).setAskPrice(askPrice);
     }
 
-    public LinkedList<MarketEdge> bellmanFord(String source) throws BellmanFordException {
+    public LinkedList<Order> bellmanFord(String source) throws BellmanFordException {
 
         // initialise a map object to track distances to vertices and the previous vertices to each vertex
         LinkedHashMap<String, Double> distances = new LinkedHashMap<>();
@@ -90,7 +91,7 @@ public class Graph {
                 Double price = (buyPrice + askPrice)/2;
                 if (price == 0.0) {
                     // No path found
-                    return new LinkedList<MarketEdge>();
+                    return new LinkedList<Order>();
                 }
                 
                 if (distances.get(quote.getName()) != Double.NEGATIVE_INFINITY && distances.get(quote.getName()) + Math.log(0.99925/price) > distances.get(base.getName())) {
@@ -112,11 +113,10 @@ public class Graph {
             }
             loopCtr++;
         }
-
-        LinkedList<MarketEdge> path = new LinkedList<>();
+        LinkedList<Order> newPath = new LinkedList<>();
         if (previous.get(source).size() == 0) {
             // No path found...
-            return path;
+            return newPath;
         }
 
         int i = 0;
@@ -125,14 +125,16 @@ public class Graph {
             try {
                 String edgeKey = previous.get(source).get(i) + previous.get(source).get(i+1);
                 if (this.getEdges().keySet().contains(edgeKey)) {
-                    path.add(this.edges.get(edgeKey));
                     double askPrice = this.edges.get(edgeKey).getAskPrice();
                     double buyPrice = this.edges.get(edgeKey).getBuyPrice();
                     profit = profit * (0.99925 * (askPrice + buyPrice)/2);
+                    newPath.add(new Order(this.edges.get(edgeKey), OrderType.SELL, (askPrice + buyPrice)/2));
                 } else {
                     edgeKey = previous.get(source).get(i + 1) + previous.get(source).get(i);
-                    path.add(this.edges.get(edgeKey));
-                    profit = profit * (0.99925/this.edges.get(edgeKey).getBuyPrice());
+                    double askPrice = this.edges.get(edgeKey).getAskPrice();
+                    double buyPrice = this.edges.get(edgeKey).getBuyPrice();
+                    profit = profit * (0.99925 / ((askPrice + buyPrice)/2));
+                    newPath.add(new Order(this.edges.get(edgeKey), OrderType.BUY, (askPrice + buyPrice)/2));
                 }
             } catch (NullPointerException e) { 
                 System.out.println(e.getStackTrace());
@@ -144,23 +146,23 @@ public class Graph {
         try {
             String edgeKey = previous.get(source).get(i) + source;
             if (this.getEdges().keySet().contains(edgeKey)) {
-                path.add(this.edges.get(previous.get(source).get(i) + source));
                 double askPrice = this.edges.get(edgeKey).getAskPrice();
                 double buyPrice = this.edges.get(edgeKey).getBuyPrice();
                 profit = profit * (0.99925 * (askPrice + buyPrice)/2);
+                newPath.add(new Order(this.edges.get(edgeKey), OrderType.SELL, (askPrice + buyPrice)/2));
             } else {
                 edgeKey = source + previous.get(source).get(i);
-                path.add(this.edges.get(edgeKey));
                 double askPrice = this.edges.get(edgeKey).getAskPrice();
                 double buyPrice = this.edges.get(edgeKey).getBuyPrice();
                 profit = profit * (0.99925/((askPrice + buyPrice)/2));
+                newPath.add(new Order(this.edges.get(edgeKey), OrderType.BUY, (askPrice + buyPrice)/2));
             }
         } catch (NullPointerException e) {
             System.out.println(e.getStackTrace());
             System.out.println(e.getMessage());
         }
         profit = (profit - 1)*100;
-        return path;
+        return newPath;
 
     }
     

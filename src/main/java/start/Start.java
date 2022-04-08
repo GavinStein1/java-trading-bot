@@ -17,6 +17,8 @@ import java.util.concurrent.Executors;
 import src.main.java.exceptions.BellmanFordException;
 import src.main.java.exceptions.ConfigException;
 import src.main.java.exceptions.MarketEdgeException;
+import src.main.java.start.Order.OrderType;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import com.binance.connector.client.impl.spot.Market;
@@ -30,6 +32,7 @@ public class Start {
     private static LinkedHashMap<String, String> configMap;
     private static Graph graph = new Graph();
     private static BinanceClient binanceClient = new BinanceClient();
+    private static boolean executingTrade = false;
 
     public static void main(String[] args) throws ConfigException {
 
@@ -102,24 +105,70 @@ public class Start {
         try {
             System.out.println("Waiting 8 seconds...");
             Thread.sleep(8000);
+            String ping = binanceMarket.ping();
+            System.out.println(ping);
             System.out.println("Let's go!");
         } catch (InterruptedException e) {
             System.out.println(e.getMessage());
         }
 
         final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(Start::runBellmanFord, 0, 10, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(Start::runBellmanFord, 0, 60, TimeUnit.MILLISECONDS);
     }
 
     public static void runBellmanFord() {
+        if (executingTrade) {
+            System.out.println("Currently executing a trade");
+            return;
+        }
+
+        LinkedList<Order> result = new LinkedList<>();
         try {
-            LinkedList<MarketEdge> result = graph.bellmanFord("USDT");
-            if (result.size() != 0) {
-                System.out.println(result);
-            }
+            result = graph.bellmanFord("USDT");
         } catch (BellmanFordException e) {
             System.out.println("Bellman ford exception thrown");
         }
+
+        if (result.size() != 0) {
+            executingTrade = true;
+            executeTrades(result);
+            executingTrade = false;
+        }
+    }
+
+    public static void executeTrades(LinkedList<Order> orders) {
+        // WalletInfo wallet = binanceClient.getWalletInfo();
+        // LinkedHashMap<String, Double> balances = new LinkedHashMap<>();
+        // for (Balance b : wallet.snapshotVos[5].data.balances) {
+        //     balances.put(b.asset, b.free);
+        // }
+        // System.out.println(balances);
+        // int counter = 0;
+        // while (counter < orders.size()) {
+        //     System.out.println("Iterating through orders");
+        //     double quantity = 0.0;
+        //     if (orders.get(counter).getOrderType() == OrderType.BUY) {
+        //         // Get quote balance
+        //         double balance = balances.get(orders.get(counter).getMarketEdge().getQuote().getName());
+        //         quantity = balance/orders.get(counter).getPrice();
+        //     } else {
+        //         // Get base balance
+        //         double balance = balances.get(orders.get(counter).getMarketEdge().getBase().getName());
+        //         quantity = balance * orders.get(counter).getPrice();
+        //     }
+        //     LinkedHashMap<String,Object> parameters = new LinkedHashMap<String,Object>();
+        //     parameters.put("symbol", orders.get(counter).getMarketEdge().toString());
+        //     parameters.put("type", "LIMIT");
+        //     parameters.put("side", orders.get(counter).getOrderType());
+        //     parameters.put("quantity", quantity);
+        //     parameters.put("price", orders.get(counter).getPrice());
+        //     System.out.println(parameters);
+        //     String responseString = binanceClient.getSpotClient().createMarket().ping();
+        //     System.out.println(responseString);
+
+        //     counter ++;
+        // }
+
     }
 
     public static LinkedHashMap<String, String> readConfigFile(String filepath) {
